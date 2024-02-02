@@ -36,8 +36,8 @@ def mark_sky(original_image):
     # find contours in opened and border-drawn image
     contours, _ = cv.findContours(img_opened, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
-    # find the largest contour among those closed to upper border
-    # 'closed' means the countour has intersection with the upper 10% of the image
+    # find the largest contour among those close to upper border
+    # 'close' means the countour has intersection with the upper 10% of the image
     upper_contours = [cnt for cnt in contours if cv.boundingRect(cnt)[1] < original_image.shape[0] * 0.1]
     largest_upper_contour = max(upper_contours, key=cv.contourArea)
 
