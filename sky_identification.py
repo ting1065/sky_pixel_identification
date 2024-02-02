@@ -3,6 +3,16 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 
+# draw a image's upper, left, and right border in black
+def draw_border(img):
+    height, width = img.shape
+
+    line_thickness = 1
+    line_color = (0, 0, 0)
+
+    cv.line(img, (0, 0), (width, 0), line_color, line_thickness)
+    cv.line(img, (0, 0), (0, height), line_color, line_thickness)
+    cv.line(img, (width-1, 0), (width-1, height), line_color, line_thickness)
 
 def mark_sky(img):
     # Convert to grayscale
@@ -19,7 +29,23 @@ def mark_sky(img):
     kernel = np.ones((6, 6), np.uint8)
     img_opened = cv.morphologyEx(img_binary, cv.MORPH_OPEN, kernel, iterations=2)
 
-    return img_opened
+    # draw the image's upper, left, and right border in black
+    # to conveniently draw sky contour later
+    draw_border(img_opened)
+
+    # find contours in opened and border-drawn image
+    contours, _ = cv.findContours(img_opened, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+
+    # find the largest contour among those closed to upper border
+    # 'closed' means the countour has intersection with the upper 10% of the image
+    upper_contours = [cnt for cnt in contours if cv.boundingRect(cnt)[1] < img.shape[0] * 0.1]
+    largest_upper_contour = max(upper_contours, key=cv.contourArea)
+
+    # draw the largest contour in red on the original image
+    cv.drawContours(img, [largest_upper_contour], -1, (255, 51, 51), thickness=cv.FILLED)
+
+
+    return img
 
 # Gradio interface
 demo = gr.Interface(
