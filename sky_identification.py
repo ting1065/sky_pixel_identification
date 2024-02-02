@@ -14,9 +14,9 @@ def draw_border(img):
     cv.line(img, (0, 0), (0, height), line_color, line_thickness)
     cv.line(img, (width-1, 0), (width-1, height), line_color, line_thickness)
 
-def mark_sky(img):
+def mark_sky(original_image):
     # Convert to grayscale
-    img_gray = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
+    img_gray = cv.cvtColor(original_image, cv.COLOR_RGB2GRAY)
 
     # Apply Gaussian blur
     img_blurred = cv.GaussianBlur(img_gray, (21, 5), 0)
@@ -38,20 +38,20 @@ def mark_sky(img):
 
     # find the largest contour among those closed to upper border
     # 'closed' means the countour has intersection with the upper 10% of the image
-    upper_contours = [cnt for cnt in contours if cv.boundingRect(cnt)[1] < img.shape[0] * 0.1]
+    upper_contours = [cnt for cnt in contours if cv.boundingRect(cnt)[1] < original_image.shape[0] * 0.1]
     largest_upper_contour = max(upper_contours, key=cv.contourArea)
 
     # draw the largest contour in red on the original image
-    cv.drawContours(img, [largest_upper_contour], -1, (255, 51, 51), thickness=cv.FILLED)
+    cv.drawContours(original_image, [largest_upper_contour], -1, (255, 51, 51), thickness=cv.FILLED)
 
 
-    return img
+    return original_image
 
 # Gradio interface
 demo = gr.Interface(
     fn=mark_sky,
     inputs = gr.Image(),
-    outputs = gr.Image(label="Processed Image"),
+    outputs = gr.Image(),
     description = "Upload an image to get the sky marked in red.",
 )
 
